@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <style>
+        #Anadiv {
+            margin: 0 auto;
+            width: 500px;
+            height: 500px;
+            text-align: center;
+        }
+
+        .kontDiv {
+            width: 150px;
+            display: inline-block;
+            text-align: right;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="Anadiv">
+        <div id="LoginDiv">
+            <div class="kontDiv"><label>Kullanıcı Adı: </label></div><input type="text" id="KullaniciAdi">
+            <br />
+            <div class="kontDiv"><label>Şifre: </label></div><input type="password" id="Sifre">
+            <br />
+            <div class="kontDiv"><button id="GirisYap">Giriş Yap</button></div>
+            <br />
+            <label id="Mesaj"></label>
+        </div>
+    </div>
+
+    <script src="jquery-3.2.1.js"></script>
+    <script src="jquery.cookie.js"></script>
+    <script>
+
+        var kacinciDeneme = 0;
+
+        $('#GirisYap').bind('click', function () {
+
+            var KullaniciAdi = $('#KullaniciAdi').val();
+            var Sifre = $('#Sifre').val();
+
+            if (KullaniciAdi.trim() == "" || Sifre.trim() == "") {
+                $('#Mesaj').css("color", "red").text("Kullanıcı adı ve şifre boş geçilemez!");
+                return;
+            }
+            $('#Mesaj').empty();
+
+            var girisZamani = parseInt(new Date().getHours().toString() + new Date().getMinutes().toString() + new Date().getSeconds().toString());
+
+            if ($.cookie("loginOlamaz") > girisZamani) {
+                $('#Mesaj').css("color", "red").text("5 defa yanlış giriş yaptınız. 5 dakika beklemelisiniz..");
+                return;
+            }
+            else if ($.cookie("loginOlamaz") < girisZamani) {
+                $.removeCookie("loginOlamaz");
+                $.removeCookie("denemeSayisi");
+                kacinciDeneme = 0;
+                $('#Mesaj').empty();
+            }
+
+            $.ajax({
+                url: 'kullanicilar.js',
+                method: 'get',
+                success: function (veri) {
+                    var kullanicilar = JSON.parse(veri);
+
+                    for (var i = 0; i < kullanicilar.length; i++) {
+                        if (KullaniciAdi == kullanicilar[i].kullanici_adi && Sifre == kullanicilar[i].sifre) {
+                            $.cookie("kisiIndeksi", kullanicilar[i].Id);
+                            $.removeCookie("loginOlamaz");
+                            $.removeCookie("denemeSayisi");
+                            kacinciDeneme = 0;
+                            window.location.href = "Anasayfa.html"
+                        }
+                    }
+
+                    kacinciDeneme++;
+                    $.cookie("denemeSayisi", kacinciDeneme, { expires: 1 })
+                    if (parseInt($.cookie("denemeSayisi")) >= 5) {
+                        $.cookie("loginOlamaz", new Date().getHours().toString() + (new Date().getMinutes() + 5).toString() + new Date().getSeconds().toString(), { expires: 1 });
+                        $('#Mesaj').css("color", "red").text("5 defa yanlış giriş yaptınız. 5 dakika beklemelisiniz..");
+                    }
+                }
+            })
+        })
+
+    </script>
+</body>
+</html>

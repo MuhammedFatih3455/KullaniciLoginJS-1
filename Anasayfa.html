@@ -1,0 +1,170 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <style>
+        #Anadiv {
+            margin: 0 auto;
+            width: 800px;
+            height: 800px;
+            border: solid;
+        }
+
+        #cikisDiv {
+            margin: 0 auto;
+            width: 150px;
+        }
+
+        #AdSoyadKullaniciadi {
+            text-align: center;
+        }
+
+        #kullaniciBaslik {
+            color: firebrick;
+            text-decoration: underline;
+        }
+
+        #kisi {
+            overflow: hidden;
+        }
+
+        #profil {
+            float: left;
+            width: 110px;
+            height: 110px;
+        }
+
+        .kisiLabel {
+            color: orange;
+            text-decoration: underline;
+        }
+
+        #kisiOzellik {
+            color: orangered;
+            font-size: 17px;
+            text-align: center;
+            width: 500px;
+        }
+
+        #ozgecmis {
+            clear: both;
+        }
+
+        #ozgecmisBaslik {
+            user-select: none;
+            cursor: pointer;
+        }
+
+        #konuBaslik {
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .kisiYetenek {
+            color: cornflowerblue;
+            font-weight: bold;
+        }
+
+        #konuIcerik ul {
+            display: inline-block;
+            list-style: none;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="Anadiv">
+        <div id="cikisDiv">
+            <button id="cikisYap">Çıkış Yap</button>
+        </div>
+        <div id="AdSoyadKullaniciadi">
+            <h1 id="kullaniciBaslik"></h1>
+        </div>
+        <hr />
+        <div id="kisi">
+            <img src="#" alt="Alternate Text" id="profil" />
+            <div id="kisiOzellik">
+                <label class="kisiLabel">Doğum Tarihi: </label><span id="dogum"></span>
+                <br />
+                <br />
+                <label class="kisiLabel">Okul: </label><span id="okul"></span>
+                <br />
+                <br />
+                <label class="kisiLabel">Fakülte/Bölüm: </label><span id="fakulte"></span>
+            </div>
+        </div>
+        <br />
+        <div id="ozgecmis">
+            <h3 class="kisiYetenek" id="ozgecmisBaslik">Özgeçmiş</h3>
+            <div class="kisiYetenek" id="ozgecmisIcerik"></div>
+        </div>
+        <br />
+        <div id="konular">
+            <h3 class="kisiYetenek" id="konuBaslik">Konular</h3>
+            <div class="kisiYetenek" id="konuIcerik"> <ul id="solIcerik"></ul> <ul id="sagIcerik"></ul></div>
+        </div>
+    </div>
+
+
+    <script src="jquery-3.2.1.js"></script>
+    <script src="jquery.cookie.js"></script>
+    <script>
+
+        if ($.cookie("kisiIndeksi")) {
+            $.ajax({
+                url: "kullanicilar.js",
+                method: "get",
+                success: function (veri) {
+                    var kullanicilar = JSON.parse(veri)
+                    var kullaniciId = $.cookie("kisiIndeksi");
+                    for (var j = 0; j < kullanicilar.length; j++) {
+                        if (kullanicilar[j].Id == kullaniciId) {
+                            $("#kullaniciBaslik").text(kullanicilar[j].isim + " " + kullanicilar[j].soyisim + " " + "(" + kullanicilar[j].kullanici_adi + ")");
+                            $("#profil").attr("src", kullanicilar[j].profil_resmi);
+
+                            $("#dogum").text(kullanicilar[j].d_tarihi);
+                            $("#okul").text(kullanicilar[j].mezun_oldgu_okul);
+                            $("#fakulte").text(kullanicilar[j].fakulte);
+
+                            $("#ozgecmisIcerik").text(kullanicilar[j].ozgeçmiş);
+
+                            for (var i = 0; i < kullanicilar[j].konular.length; i++) {
+                                if (i % 2 == 0) {
+                                    $("#solIcerik").append("<li>" + "* " + kullanicilar[j].konular[i] + "</li>");
+                                }
+                                else {
+                                    $("#sagIcerik").append("<li>" + "* " + kullanicilar[j].konular[i] + "</li>");
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            })
+        }
+        else {
+            window.location.href = "Login.html"
+        }
+
+        $("#ozgecmisBaslik").bind("click", function () {
+            $("#ozgecmisIcerik").slideToggle();
+        })
+
+        $("#konuBaslik").bind("click", function () {
+            $("#konuIcerik").slideToggle();
+        })
+
+        $('#cikisYap').bind('click', function () {
+            var cerezler = $.cookie();
+            for (var cerez in cerezler) {
+                $.removeCookie(cerez);
+            }
+
+            window.location.href = 'Login.html';
+        })
+    </script>
+</body>
+</html>
