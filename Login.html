@@ -42,6 +42,17 @@
 
         $('#GirisYap').bind('click', function () {
 
+            if ($.cookie("loginOlamaz")) {
+                $('#Mesaj').css("color", "red").text("5 defa yanlış giriş yaptınız. 5 dakika beklemelisiniz..");
+                return;
+            }
+            else if ($.cookie("loginOlamaz") == undefined && parseInt($.cookie("denemeSayisi")) >= 5) {
+                $.removeCookie("loginOlamaz");
+                $.removeCookie("denemeSayisi");
+                kacinciDeneme = 0;
+                $('#Mesaj').empty();
+            }
+
             var KullaniciAdi = $('#KullaniciAdi').val();
             var Sifre = $('#Sifre').val();
 
@@ -50,19 +61,6 @@
                 return;
             }
             $('#Mesaj').empty();
-
-            var girisZamani = parseInt(new Date().getHours().toString() + new Date().getMinutes().toString() + new Date().getSeconds().toString());
-
-            if ($.cookie("loginOlamaz") > girisZamani) {
-                $('#Mesaj').css("color", "red").text("5 defa yanlış giriş yaptınız. 5 dakika beklemelisiniz..");
-                return;
-            }
-            else if ($.cookie("loginOlamaz") < girisZamani) {
-                $.removeCookie("loginOlamaz");
-                $.removeCookie("denemeSayisi");
-                kacinciDeneme = 0;
-                $('#Mesaj').empty();
-            }
 
             $.ajax({
                 url: 'kullanicilar.js',
@@ -76,18 +74,18 @@
                             $.removeCookie("loginOlamaz");
                             $.removeCookie("denemeSayisi");
                             kacinciDeneme = 0;
-                            window.location.href = "Anasayfa.html"
+                            window.location.href = "Anasayfa.html";
+                            break;
                         }
-                    }
-
-                    kacinciDeneme++;
-                    $.cookie("denemeSayisi", kacinciDeneme, { expires: 1 })
-                    if (parseInt($.cookie("denemeSayisi")) >= 5) {
-                        $.cookie("loginOlamaz", new Date().getHours().toString() + (new Date().getMinutes() + 5).toString() + new Date().getSeconds().toString(), { expires: 1 });
-                        $('#Mesaj').css("color", "red").text("5 defa yanlış giriş yaptınız. 5 dakika beklemelisiniz..");
                     }
                 }
             })
+            kacinciDeneme++;
+            $.cookie("denemeSayisi", kacinciDeneme, { expires: (15 / (24 * 60)) })
+            if (parseInt($.cookie("denemeSayisi")) >= 5) {
+                $.cookie("loginOlamaz", new Date().getHours().toString() + (new Date().getMinutes() + 5).toString() + new Date().getSeconds().toString(), { expires: (5 / (24 * 60)) });
+                $('#Mesaj').css("color", "red").text("5 defa yanlış giriş yaptınız. 5 dakika beklemelisiniz..");
+            }
         })
 
     </script>
